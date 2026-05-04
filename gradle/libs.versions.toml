@@ -10,6 +10,9 @@ hilt = "2.59.2"
 hiltNavigationCompose = "1.3.0"
 coilCompose = "2.7.0"
 accompanistPermissions = "0.37.3"
+gms = "4.4.4"
+firebaseBom = "34.12.0"
+firebaseUi = "9.1.1"
 
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -30,7 +33,7 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-material-icons = { group = "androidx.compose.material", name = "material-icons-extended"}
+material-icons = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
@@ -38,6 +41,11 @@ hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", ve
 
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom"}
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth"}
+firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref = "firebaseUi"}
+
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -51,4 +59,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+gms = { id = "com.google.gms.google-services", version.ref = "gms" }
 
