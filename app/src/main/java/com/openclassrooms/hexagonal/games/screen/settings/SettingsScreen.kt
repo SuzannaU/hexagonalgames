@@ -36,7 +36,8 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 fun SettingsScreen(
   modifier: Modifier = Modifier,
   viewModel: SettingsViewModel = hiltViewModel(),
-  onBackClick: () -> Unit
+  onBackClick: () -> Unit,
+  onSignInClicked: ()-> Unit,
 ) {
   Scaffold(
     modifier = modifier,
@@ -63,7 +64,8 @@ fun SettingsScreen(
       onNotificationDisabledClicked = { viewModel.disableNotifications() },
       onNotificationEnabledClicked = {
         viewModel.enableNotifications()
-      }
+      },
+      onSignInClicked = onSignInClicked,
     )
   }
 }
@@ -73,7 +75,8 @@ fun SettingsScreen(
 private fun Settings(
   modifier: Modifier = Modifier,
   onNotificationEnabledClicked: () -> Unit,
-  onNotificationDisabledClicked: () -> Unit
+  onNotificationDisabledClicked: () -> Unit,
+  onSignInClicked: ()-> Unit,
 ) {
   val notificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
     rememberPermissionState(
@@ -84,7 +87,7 @@ private fun Settings(
   }
   
   Column(
-    modifier = Modifier.fillMaxSize(),
+    modifier = modifier.fillMaxSize(),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.SpaceEvenly
   ) {
@@ -94,6 +97,13 @@ private fun Settings(
       tint = MaterialTheme.colorScheme.onSurface,
       contentDescription = stringResource(id = R.string.contentDescription_notification_icon)
     )
+
+    Button(
+      onClick = onSignInClicked
+    ) {
+      Text(text = "se connecter")
+    }
+
     Button(
       onClick = {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -122,7 +132,8 @@ private fun SettingsPreview() {
   HexagonalGamesTheme {
     Settings(
       onNotificationEnabledClicked = { },
-      onNotificationDisabledClicked = { }
+      onNotificationDisabledClicked = { },
+      onSignInClicked = { },
     )
   }
 }

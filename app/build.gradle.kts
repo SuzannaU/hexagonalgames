@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.material.icons)
     implementation(libs.compose.material3)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
