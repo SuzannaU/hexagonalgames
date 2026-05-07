@@ -7,6 +7,7 @@ import com.openclassrooms.hexagonal.games.domain.model.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +21,21 @@ class HomefeedViewModel @Inject constructor(private val postRepository: PostRepo
   ViewModel() {
   
   private val _posts: MutableStateFlow<List<Post>> = MutableStateFlow(emptyList())
+
+  private val _homeUiState = MutableStateFlow<HomeScreenState>(HomeScreenState.NoPosts)
+  val homeUiState = _homeUiState.asStateFlow()
+
+  init {
+    viewModelScope.launch {
+      postRepository.posts.collect { posts ->
+        if (posts.isEmpty()) {
+          _homeUiState.value = HomeScreenState.NoPosts
+        } else {
+          _homeUiState.value = HomeScreenState.PostsLoaded(posts)
+        }
+      }
+    }
+  }
   
   /**
    * Returns a Flow observable containing the list of posts fetched from the repository.
@@ -28,13 +44,18 @@ class HomefeedViewModel @Inject constructor(private val postRepository: PostRepo
    */
   val posts: StateFlow<List<Post>>
     get() = _posts
-  
-  init {
-    viewModelScope.launch {
-      postRepository.posts.collect {
-        _posts.value = it
-      }
-    }
-  }
-  
+
+}
+
+sealed class HomeScreenState() {
+
+  object NoPosts : HomeScreenState()
+
+  data class ErrorState(
+    val errorMessage: String?,
+  ): HomeScreenState()
+
+  data class PostsLoaded(
+    val posts: List<Post>,
+  ) : HomeScreenState()
 }

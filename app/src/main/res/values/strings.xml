@@ -12,7 +12,10 @@
   <string name="action_save">Save</string>
   <string name="contentDescription_go_back">Go back</string>
   <string name="contentDescription_more">More</string>
-  <string name="contentDescription_notification_icon">Icone de notification</string>
+  <string name="contentDescription_notification_icon">Notification icon</string>
   <string name="error_title">Title not valid</string>
   <string name="sign_in_with_email">Sign in with email</string>
+  <string name="my_account">My account</string>
+  <string name="no_posts">No posts</string>
+  <string name="need_authentication">An account is mandatory in order to add a post</string>
 </resources>

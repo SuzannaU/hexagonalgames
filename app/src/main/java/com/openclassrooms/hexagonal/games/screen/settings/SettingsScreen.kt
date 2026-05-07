@@ -34,106 +34,122 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-  modifier: Modifier = Modifier,
-  viewModel: SettingsViewModel = hiltViewModel(),
-  onBackClick: () -> Unit,
-  onSignInClicked: ()-> Unit,
+    isUserAuthenticated: Boolean,
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
+    onSignInClicked: () -> Unit,
+    onSignOutClicked: () -> Unit,
 ) {
-  Scaffold(
-    modifier = modifier,
-    topBar = {
-      TopAppBar(
-        title = {
-          Text(stringResource(id = R.string.action_settings))
-        },
-        navigationIcon = {
-          IconButton(onClick = {
-            onBackClick()
-          }) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = stringResource(id = R.string.contentDescription_go_back)
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(stringResource(id = R.string.action_settings))
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        onBackClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.contentDescription_go_back)
+                        )
+                    }
+                }
             )
-          }
         }
-      )
+    ) { contentPadding ->
+        Settings(
+            isUserAuthenticated = isUserAuthenticated,
+            modifier = Modifier.padding(contentPadding),
+            onNotificationDisabledClicked = { viewModel.disableNotifications() },
+            onNotificationEnabledClicked = {
+                viewModel.enableNotifications()
+            },
+            onSignInClicked = onSignInClicked,
+            onSignOutClicked = onSignOutClicked,
+        )
     }
-  ) { contentPadding ->
-    Settings(
-      modifier = Modifier.padding(contentPadding),
-      onNotificationDisabledClicked = { viewModel.disableNotifications() },
-      onNotificationEnabledClicked = {
-        viewModel.enableNotifications()
-      },
-      onSignInClicked = onSignInClicked,
-    )
-  }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun Settings(
-  modifier: Modifier = Modifier,
-  onNotificationEnabledClicked: () -> Unit,
-  onNotificationDisabledClicked: () -> Unit,
-  onSignInClicked: ()-> Unit,
+    isUserAuthenticated: Boolean,
+    modifier: Modifier = Modifier,
+    onNotificationEnabledClicked: () -> Unit,
+    onNotificationDisabledClicked: () -> Unit,
+    onSignInClicked: () -> Unit,
+    onSignOutClicked: () -> Unit,
 ) {
-  val notificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    rememberPermissionState(
-      android.Manifest.permission.POST_NOTIFICATIONS
-    )
-  } else {
-    null
-  }
-  
-  Column(
-    modifier = modifier.fillMaxSize(),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.SpaceEvenly
-  ) {
-    Icon(
-      modifier = Modifier.size(200.dp),
-      painter = painterResource(id = R.drawable.ic_notifications),
-      tint = MaterialTheme.colorScheme.onSurface,
-      contentDescription = stringResource(id = R.string.contentDescription_notification_icon)
-    )
-
-    Button(
-      onClick = onSignInClicked
-    ) {
-      Text(text = "se connecter")
+    val notificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(
+            android.Manifest.permission.POST_NOTIFICATIONS
+        )
+    } else {
+        null
     }
 
-    Button(
-      onClick = {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-          if (notificationsPermissionState?.status?.isGranted == false) {
-            notificationsPermissionState.launchPermissionRequest()
-          }
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Icon(
+            modifier = Modifier.size(200.dp),
+            painter = painterResource(id = R.drawable.ic_notifications),
+            tint = MaterialTheme.colorScheme.onSurface,
+            contentDescription = stringResource(id = R.string.contentDescription_notification_icon)
+        )
+
+        if (isUserAuthenticated) {
+            Button(
+                onClick = onSignOutClicked
+            ) {
+                Text(text = "se déconnecter")
+            }
+        } else {
+            Button(
+                onClick = onSignInClicked
+            ) {
+                Text(text = "se connecter")
+            }
         }
-        
-        onNotificationEnabledClicked()
-      }
-    ) {
-      Text(text = stringResource(id = R.string.notification_enable))
+
+        Button(
+            onClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (notificationsPermissionState?.status?.isGranted == false) {
+                        notificationsPermissionState.launchPermissionRequest()
+                    }
+                }
+
+                onNotificationEnabledClicked()
+            }
+        ) {
+            Text(text = stringResource(id = R.string.notification_enable))
+        }
+        Button(
+            onClick = { onNotificationDisabledClicked() }
+        ) {
+            Text(text = stringResource(id = R.string.notification_disable))
+        }
     }
-    Button(
-      onClick = { onNotificationDisabledClicked() }
-    ) {
-      Text(text = stringResource(id = R.string.notification_disable))
-    }
-  }
 }
 
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
 private fun SettingsPreview() {
-  HexagonalGamesTheme {
-    Settings(
-      onNotificationEnabledClicked = { },
-      onNotificationDisabledClicked = { },
-      onSignInClicked = { },
-    )
-  }
+    HexagonalGamesTheme {
+        Settings(
+            isUserAuthenticated = true,
+            onNotificationEnabledClicked = { },
+            onNotificationDisabledClicked = { },
+            onSignInClicked = { },
+            onSignOutClicked = { },
+        )
+    }
 }

@@ -2,9 +2,17 @@ package com.openclassrooms.hexagonal.games.ui
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,9 +20,6 @@ import androidx.navigation.compose.rememberNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
@@ -30,32 +35,47 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var auth: FirebaseAuth
+    private val viewModel: MainActivityViewModel by viewModels()
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract(),
         ::onSignInResult,
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = Firebase.auth
+        enableEdgeToEdge()
 
         setContent {
             val navController = rememberNavController()
             HexagonalGamesTheme {
-                HexagonalGamesNavHost(
-                    navHostController = navController,
-                    onSignInClicked = { startSignInActivity() }
-                )
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+                    val authState = viewModel.authState.collectAsStateWithLifecycle()
+
+                    HexagonalGamesNavHost(
+                        isUserAuthenticated = authState.value.isAuthenticated,
+                        navHostController = navController,
+                        onSignInClicked = { startSignInActivity() },
+                        onSignOutClicked = { signOut() },
+                        modifier = Modifier.padding(innerPadding),
+                        showNoPostsToast = { showNoPostsToast() },
+                        showNotAuthentifiedToast = { showNotAuthentifiedToast() }
+                    )
+                }
             }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        val currentUser = auth.currentUser
+        val currentUser = viewModel.getCurrentUser()
         if (currentUser != null) {
-            Log.d("TAG", "user is authentified")
+            Log.d("TAG", "user is authenticated")
+            viewModel.userIsAuthenticated()
+        } else {
+            Log.d("TAG", "user is NOT authenticated")
+            viewModel.userIsNotAuthenticated()
         }
     }
 
@@ -78,24 +98,43 @@ class MainActivity : ComponentActivity() {
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
         val response = result.idpResponse
         if (result.resultCode == RESULT_OK) {
-            //userManager.createUser()
+            viewModel.userIsAuthenticated()
             Log.d("TAG", "connexion successful")
         } else if (response?.error != null) {
+            viewModel.userIsNotAuthenticated()
             Log.d("TAG", "connexion failed")
         }
+    }
+
+    private fun signOut() {
+        viewModel.signOut()
+    }
+
+    private fun showNoPostsToast() {
+        Toast.makeText(this, getString(R.string.no_posts), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showNotAuthentifiedToast() {
+        Toast.makeText(this, getString(R.string.need_authentication), Toast.LENGTH_SHORT).show()
     }
 }
 
 @Composable
 fun HexagonalGamesNavHost(
+    isUserAuthenticated: Boolean,
     navHostController: NavHostController,
     onSignInClicked: () -> Unit,
+    onSignOutClicked: () -> Unit,
+    showNoPostsToast: () -> Unit,
+    showNotAuthentifiedToast: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Homefeed.route
+        startDestination = Screen.HomeFeed.route,
+        modifier = modifier
     ) {
-        composable(route = Screen.Homefeed.route) {
+        composable(route = Screen.HomeFeed.route) {
             HomeFeedScreen(
                 onPostClick = {
                     //TODO
@@ -104,8 +143,17 @@ fun HexagonalGamesNavHost(
                     navHostController.navigate(Screen.Settings.route)
                 },
                 onFABClick = {
-                    navHostController.navigate(Screen.AddPost.route)
-                }
+                    if (isUserAuthenticated) {
+                        navHostController.navigate(Screen.AddPost.route)
+                    } else {
+                        showNotAuthentifiedToast()
+                    }
+
+                },
+                onAccountClick = {
+                    //TODO
+                },
+                showNoPostsToast = showNoPostsToast
             )
         }
         composable(route = Screen.AddPost.route) {
@@ -116,8 +164,10 @@ fun HexagonalGamesNavHost(
         }
         composable(route = Screen.Settings.route) {
             SettingsScreen(
+                isUserAuthenticated = isUserAuthenticated,
                 onBackClick = { navHostController.navigateUp() },
-                onSignInClicked = onSignInClicked
+                onSignInClicked = onSignInClicked,
+                onSignOutClicked = onSignOutClicked,
             )
         }
     }

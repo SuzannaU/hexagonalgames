@@ -6,7 +6,7 @@ sealed class Screen(
   val route: String,
   val navArguments: List<NamedNavArgument> = emptyList()
 ) {
-  data object Homefeed : Screen("homefeed")
+  data object HomeFeed : Screen("homefeed")
   
   data object AddPost : Screen("addPost")
   

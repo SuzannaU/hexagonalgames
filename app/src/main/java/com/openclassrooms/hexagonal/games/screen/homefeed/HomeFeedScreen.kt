@@ -52,11 +52,14 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 fun HomeFeedScreen(
   modifier: Modifier = Modifier,
   viewModel: HomefeedViewModel = hiltViewModel(),
-  onPostClick: (Post) -> Unit = {},
   onSettingsClick: () -> Unit = {},
+  onAccountClick: () -> Unit = {},
+  onPostClick: (Post) -> Unit = {},
   onFABClick: () -> Unit = {},
+  showNoPostsToast: () -> Unit,
 ) {
   var showMenu by rememberSaveable { mutableStateOf(false) }
+  val uiState = viewModel.homeUiState.collectAsStateWithLifecycle()
   
   Scaffold(
     modifier = modifier,
@@ -86,6 +89,16 @@ fun HomeFeedScreen(
                 )
               }
             )
+            DropdownMenuItem(
+              onClick = {
+                onAccountClick()
+              },
+              text = {
+                Text(
+                  text = stringResource(id = R.string.my_account)
+                )
+              }
+            )
           }
         }
       )
@@ -104,18 +117,27 @@ fun HomeFeedScreen(
       }
     }
   ) { contentPadding ->
-    val posts by viewModel.posts.collectAsStateWithLifecycle()
-    
-    HomefeedList(
-      modifier = modifier.padding(contentPadding),
-      posts = posts,
-      onPostClick = onPostClick
-    )
+    when (uiState.value) {
+
+        is HomeScreenState.ErrorState -> TODO()
+
+        HomeScreenState.NoPosts -> {
+          showNoPostsToast()
+        }
+
+        is HomeScreenState.PostsLoaded -> {
+          HomeFeedList(
+            modifier = modifier.padding(contentPadding),
+            posts = (uiState.value as HomeScreenState.PostsLoaded).posts,
+            onPostClick = onPostClick
+          )
+        }
+    }
   }
 }
 
 @Composable
-private fun HomefeedList(
+private fun HomeFeedList(
   modifier: Modifier = Modifier,
   posts: List<Post>,
   onPostClick: (Post) -> Unit,
@@ -125,7 +147,7 @@ private fun HomefeedList(
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     items(posts) { post ->
-      HomefeedCell(
+      HomeFeedCell(
         post = post,
         onPostClick = onPostClick
       )
@@ -134,7 +156,7 @@ private fun HomefeedList(
 }
 
 @Composable
-private fun HomefeedCell(
+private fun HomeFeedCell(
   post: Post,
   onPostClick: (Post) -> Unit,
 ) {
@@ -187,9 +209,9 @@ private fun HomefeedCell(
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
-private fun HomefeedCellPreview() {
+private fun HomeFeedCellPreview() {
   HexagonalGamesTheme {
-    HomefeedCell(
+    HomeFeedCell(
       post = Post(
         id = "1",
         title = "title",
@@ -210,9 +232,9 @@ private fun HomefeedCellPreview() {
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
-private fun HomefeedCellImagePreview() {
+private fun HomeFeedCellImagePreview() {
   HexagonalGamesTheme {
-    HomefeedCell(
+    HomeFeedCell(
       post = Post(
         id = "1",
         title = "title",

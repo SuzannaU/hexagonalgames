@@ -41,7 +41,7 @@ class AppModule {
   @Provides
   @Singleton
   fun provideUserRepository(): UserRepository {
-    return UserRepository()
+    return UserRepository(provideFirebaseAuth())
   }
 
   @Provides
