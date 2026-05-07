@@ -1,8 +1,15 @@
 package com.openclassrooms.hexagonal.games.screen.ad
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,15 +27,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 
@@ -38,8 +50,10 @@ fun AddScreen(
   modifier: Modifier = Modifier,
   viewModel: AddViewModel = hiltViewModel(),
   onBackClick: () -> Unit,
-  onSaveClick: () -> Unit
+  onSaveClick: () -> Unit,
+  onSelectPhotoClick: (ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) -> Unit,
 ) {
+
   Scaffold(
     modifier = modifier,
     topBar = {
@@ -62,6 +76,8 @@ fun AddScreen(
   ) { contentPadding ->
     val post by viewModel.post.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
+
+    var selectedImage = rememberSaveable { mutableStateOf<Uri?>(null) }
     
     CreatePost(
       modifier = Modifier.padding(contentPadding),
@@ -73,7 +89,8 @@ fun AddScreen(
       onSaveClicked = {
         viewModel.addPost()
         onSaveClick()
-      }
+      },
+      onSelectPhotoClick = onSelectPhotoClick,
     )
   }
 }
@@ -86,9 +103,20 @@ private fun CreatePost(
   description: String,
   onDescriptionChanged: (String) -> Unit,
   onSaveClicked: () -> Unit,
+  onSelectPhotoClick: (ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) -> Unit,
   error: FormError?
 ) {
   val scrollState = rememberScrollState()
+
+  val selectedImageUri = rememberSaveable { mutableStateOf<Uri?>(null) }
+
+  val photoPicker = rememberLauncherForActivityResult(
+    ActivityResultContracts.PickVisualMedia(),
+    onResult = { uri ->
+      Log.d("TAG", "selected uri is $uri")
+      selectedImageUri.value = uri
+    }
+  )
   
   Column(
     modifier = modifier
@@ -128,6 +156,20 @@ private fun CreatePost(
         label = { Text(stringResource(id = R.string.hint_description)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
       )
+
+      AsyncImage(
+        model = selectedImageUri.value ?: R.drawable.placeholder,
+        contentDescription = null,
+        modifier = Modifier.fillMaxWidth().height(200.dp),
+        contentScale = ContentScale.Fit,
+      )
+
+      Button(
+        onClick = { onSelectPhotoClick(photoPicker) }
+      ) {
+        Text(text = stringResource(R.string.select_photo))
+      }
+
     }
     Button(
       enabled = error == null,
@@ -152,7 +194,8 @@ private fun CreatePostPreview() {
       description = "description",
       onDescriptionChanged = { },
       onSaveClicked = { },
-      error = null
+      error = null,
+      onSelectPhotoClick = {},
     )
   }
 }
@@ -168,7 +211,8 @@ private fun CreatePostErrorPreview() {
       description = "description",
       onDescriptionChanged = { },
       onSaveClicked = { },
-      error = FormError.TitleError
+      error = FormError.TitleError,
+      onSelectPhotoClick = {},
     )
   }
 }

@@ -1,11 +1,15 @@
 package com.openclassrooms.hexagonal.games.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -58,6 +62,7 @@ class MainActivity : ComponentActivity() {
                         navHostController = navController,
                         onSignInClicked = { startSignInActivity() },
                         onSignOutClicked = { signOut() },
+                        onSelectPhotoClicked = ::launchPhotoPicker,
                         modifier = Modifier.padding(innerPadding),
                         showNoPostsToast = { showNoPostsToast() },
                         showNotAuthentifiedToast = { showNotAuthentifiedToast() }
@@ -80,7 +85,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startSignInActivity() {
-        val providers = arrayListOf<AuthUI.IdpConfig>(
+        val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build()
         )
 
@@ -110,6 +115,18 @@ class MainActivity : ComponentActivity() {
         viewModel.signOut()
     }
 
+//    val pickMediaLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+//        if (uri != null) {
+//            Log.d("TAG", "photo picked")
+//        } else {
+//            Log.d("TAG", "photo not picked")
+//        }
+//    }
+
+    private fun launchPhotoPicker(pickMediaLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
+        pickMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
     private fun showNoPostsToast() {
         Toast.makeText(this, getString(R.string.no_posts), Toast.LENGTH_SHORT).show()
     }
@@ -125,6 +142,7 @@ fun HexagonalGamesNavHost(
     navHostController: NavHostController,
     onSignInClicked: () -> Unit,
     onSignOutClicked: () -> Unit,
+    onSelectPhotoClicked: ((ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>)) -> Unit,
     showNoPostsToast: () -> Unit,
     showNotAuthentifiedToast: () -> Unit,
     modifier: Modifier = Modifier,
@@ -159,7 +177,8 @@ fun HexagonalGamesNavHost(
         composable(route = Screen.AddPost.route) {
             AddScreen(
                 onBackClick = { navHostController.navigateUp() },
-                onSaveClick = { navHostController.navigateUp() }
+                onSaveClick = { navHostController.navigateUp() },
+                onSelectPhotoClick = onSelectPhotoClicked,
             )
         }
         composable(route = Screen.Settings.route) {

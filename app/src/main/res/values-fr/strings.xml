@@ -18,4 +18,5 @@
   <string name="my_account">Mon compte</string>
   <string name="no_posts">Aucune publication</string>
   <string name="need_authentication">Un compte est nécessaire pour ajouter une publication</string>
+  <string name="select_photo">Sélectionner une photo</string>
 </resources>

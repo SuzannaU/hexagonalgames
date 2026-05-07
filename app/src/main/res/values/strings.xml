@@ -18,4 +18,5 @@
   <string name="my_account">My account</string>
   <string name="no_posts">No posts</string>
   <string name="need_authentication">An account is mandatory in order to add a post</string>
+  <string name="select_photo">Select a photo</string>
 </resources>
