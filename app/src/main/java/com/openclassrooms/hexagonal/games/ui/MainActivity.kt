@@ -26,6 +26,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.screen.Screen
+import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
 import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomeFeedScreen
 import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
@@ -61,12 +62,11 @@ class MainActivity : ComponentActivity() {
                         isUserAuthenticated = authState.value.isAuthenticated,
                         navHostController = navController,
                         onSignInClicked = { startSignInActivity() },
-                        onSignOutClicked = { signOut() },
                         onSelectPhotoClicked = ::launchPhotoPicker,
                         modifier = Modifier.padding(innerPadding),
                         showNoPostsToast = { showNoPostsToast() },
                         showNotAuthentifiedToast = { showNotAuthentifiedToast() },
-                        showSaveErrorToast = { showSaveErrorToast() }
+                        showUnknownErrorToast = { showUnknownErrorToast() }
                     )
                 }
             }
@@ -128,8 +128,8 @@ class MainActivity : ComponentActivity() {
         Toast.makeText(this, getString(R.string.need_authentication), Toast.LENGTH_SHORT).show()
     }
 
-    private fun showSaveErrorToast() {
-        Toast.makeText(this, getString(R.string.save_error), Toast.LENGTH_SHORT).show()
+    private fun showUnknownErrorToast() {
+        Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -138,11 +138,10 @@ fun HexagonalGamesNavHost(
     isUserAuthenticated: Boolean,
     navHostController: NavHostController,
     onSignInClicked: () -> Unit,
-    onSignOutClicked: () -> Unit,
     onSelectPhotoClicked: ((ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>)) -> Unit,
     showNoPostsToast: () -> Unit,
     showNotAuthentifiedToast: () -> Unit,
-    showSaveErrorToast: () -> Unit,
+    showUnknownErrorToast: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -167,7 +166,11 @@ fun HexagonalGamesNavHost(
 
                 },
                 onAccountClick = {
-                    //TODO
+                    if (isUserAuthenticated) {
+                        navHostController.navigate(Screen.Account.route)
+                    } else {
+                        onSignInClicked()
+                    }
                 },
                 showNoPostsToast = showNoPostsToast
             )
@@ -176,16 +179,21 @@ fun HexagonalGamesNavHost(
             AddScreen(
                 onBackClick = { navHostController.navigateUp() },
                 onSaveSuccessful = { navHostController.navigateUp() },
-                onSaveFailed = showSaveErrorToast,
+                onSaveFailed = showUnknownErrorToast,
                 onSelectPhotoClick = onSelectPhotoClicked,
             )
         }
         composable(route = Screen.Settings.route) {
             SettingsScreen(
-                isUserAuthenticated = isUserAuthenticated,
                 onBackClick = { navHostController.navigateUp() },
-                onSignInClicked = onSignInClicked,
-                onSignOutClicked = onSignOutClicked,
+            )
+        }
+        composable(route = Screen.Account.route) {
+            AccountScreen(
+                onBackClick = { navHostController.navigateUp() },
+                accountDeleted = { navHostController.navigate(Screen.HomeFeed.route) },
+                deletionError = showUnknownErrorToast,
+                afterSignOut = { navHostController.navigate(Screen.HomeFeed.route) }
             )
         }
     }

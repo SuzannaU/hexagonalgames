@@ -34,12 +34,9 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    isUserAuthenticated: Boolean,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onSignInClicked: () -> Unit,
-    onSignOutClicked: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -62,14 +59,11 @@ fun SettingsScreen(
         }
     ) { contentPadding ->
         Settings(
-            isUserAuthenticated = isUserAuthenticated,
             modifier = Modifier.padding(contentPadding),
             onNotificationDisabledClicked = { viewModel.disableNotifications() },
             onNotificationEnabledClicked = {
                 viewModel.enableNotifications()
             },
-            onSignInClicked = onSignInClicked,
-            onSignOutClicked = onSignOutClicked,
         )
     }
 }
@@ -77,12 +71,9 @@ fun SettingsScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun Settings(
-    isUserAuthenticated: Boolean,
     modifier: Modifier = Modifier,
     onNotificationEnabledClicked: () -> Unit,
     onNotificationDisabledClicked: () -> Unit,
-    onSignInClicked: () -> Unit,
-    onSignOutClicked: () -> Unit,
 ) {
     val notificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(
@@ -103,20 +94,6 @@ private fun Settings(
             tint = MaterialTheme.colorScheme.onSurface,
             contentDescription = stringResource(id = R.string.contentDescription_notification_icon)
         )
-
-        if (isUserAuthenticated) {
-            Button(
-                onClick = onSignOutClicked
-            ) {
-                Text(text = "se déconnecter")
-            }
-        } else {
-            Button(
-                onClick = onSignInClicked
-            ) {
-                Text(text = "se connecter")
-            }
-        }
 
         Button(
             onClick = {
@@ -145,11 +122,8 @@ private fun Settings(
 private fun SettingsPreview() {
     HexagonalGamesTheme {
         Settings(
-            isUserAuthenticated = true,
             onNotificationEnabledClicked = { },
             onNotificationDisabledClicked = { },
-            onSignInClicked = { },
-            onSignOutClicked = { },
         )
     }
 }
