@@ -65,7 +65,8 @@ class MainActivity : ComponentActivity() {
                         onSelectPhotoClicked = ::launchPhotoPicker,
                         modifier = Modifier.padding(innerPadding),
                         showNoPostsToast = { showNoPostsToast() },
-                        showNotAuthentifiedToast = { showNotAuthentifiedToast() }
+                        showNotAuthentifiedToast = { showNotAuthentifiedToast() },
+                        showSaveErrorToast = { showSaveErrorToast() }
                     )
                 }
             }
@@ -115,14 +116,6 @@ class MainActivity : ComponentActivity() {
         viewModel.signOut()
     }
 
-//    val pickMediaLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-//        if (uri != null) {
-//            Log.d("TAG", "photo picked")
-//        } else {
-//            Log.d("TAG", "photo not picked")
-//        }
-//    }
-
     private fun launchPhotoPicker(pickMediaLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
         pickMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
@@ -133,6 +126,10 @@ class MainActivity : ComponentActivity() {
 
     private fun showNotAuthentifiedToast() {
         Toast.makeText(this, getString(R.string.need_authentication), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showSaveErrorToast() {
+        Toast.makeText(this, getString(R.string.save_error), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -145,6 +142,7 @@ fun HexagonalGamesNavHost(
     onSelectPhotoClicked: ((ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>)) -> Unit,
     showNoPostsToast: () -> Unit,
     showNotAuthentifiedToast: () -> Unit,
+    showSaveErrorToast: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -177,7 +175,8 @@ fun HexagonalGamesNavHost(
         composable(route = Screen.AddPost.route) {
             AddScreen(
                 onBackClick = { navHostController.navigateUp() },
-                onSaveClick = { navHostController.navigateUp() },
+                onSaveSuccessful = { navHostController.navigateUp() },
+                onSaveFailed = showSaveErrorToast,
                 onSelectPhotoClick = onSelectPhotoClicked,
             )
         }

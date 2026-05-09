@@ -21,12 +21,12 @@ data class Post(
   /**
    * Optional description for the Post.
    */
-  val description: String?,
+  val description: String,
   
   /**
    * URL of an image associated with the Post, if any.
    */
-  val photoUrl: String?,
+  val photoUrl: String,
   
   /**
    * Timestamp representing the creation date and time of the Post in milliseconds since epoch.

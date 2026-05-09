@@ -180,7 +180,7 @@ private fun HomeFeedCell(
         text = post.title,
         style = MaterialTheme.typography.titleLarge
       )
-      if (post.photoUrl.isNullOrEmpty() == false) {
+      if (post.photoUrl.isEmpty() == false) {
         AsyncImage(
           modifier = Modifier
             .padding(top = 8.dp)
@@ -216,7 +216,7 @@ private fun HomeFeedCellPreview() {
         id = "1",
         title = "title",
         description = "description",
-        photoUrl = null,
+        photoUrl = "",
         timestamp = 1,
         author = User(
           id = "1",
@@ -238,7 +238,7 @@ private fun HomeFeedCellImagePreview() {
       post = Post(
         id = "1",
         title = "title",
-        description = null,
+        description = "",
         photoUrl = "https://picsum.photos/id/85/1080/",
         timestamp = 1,
         author = User(

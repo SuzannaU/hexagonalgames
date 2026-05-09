@@ -14,9 +14,12 @@
   <string name="contentDescription_more">More</string>
   <string name="contentDescription_notification_icon">Notification icon</string>
   <string name="error_title">Title not valid</string>
+  <string name="error_description">Invalid description</string>
+  <string name="error_photo">Invalid photo</string>
   <string name="sign_in_with_email">Sign in with email</string>
   <string name="my_account">My account</string>
   <string name="no_posts">No posts</string>
   <string name="need_authentication">An account is mandatory in order to add a post</string>
+  <string name="save_error">An issue occured</string>
   <string name="select_photo">Select a photo</string>
 </resources>
