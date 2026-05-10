@@ -96,7 +96,11 @@ class AddViewModel @Inject constructor(
                 try {
                     postRepository.addPost(
                         _post.value.copy(
-                            author = User(it.uid, it.displayName ?: "", "")
+                            author = User(
+                                id = it.uid,
+                                pictureUrl = it.photoUrl.toString(),
+                                username = it.displayName ?: "",
+                            )
                         )
                     )
                 } catch (e: Exception) {

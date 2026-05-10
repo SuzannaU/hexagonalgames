@@ -12,14 +12,8 @@ data class User(
    * Unique identifier for the User.
    */
   val id: String,
-  
-  /**
-   * User's first name.
-   */
-  val firstname: String,
-  
-  /**
-   * User's last name.
-   */
-  val lastname: String
+
+  val pictureUrl: String,
+
+  val username: String,
 ) : Serializable

@@ -50,13 +50,13 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeFeedScreen(
-  modifier: Modifier = Modifier,
-  viewModel: HomefeedViewModel = hiltViewModel(),
-  onSettingsClick: () -> Unit = {},
-  onAccountClick: () -> Unit = {},
-  onPostClick: (Post) -> Unit = {},
-  onFABClick: () -> Unit = {},
-  showNoPostsToast: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: HomeFeedViewModel = hiltViewModel(),
+    onSettingsClick: () -> Unit = {},
+    onAccountClick: () -> Unit = {},
+    onPostClick: (Post) -> Unit = {},
+    onFABClick: () -> Unit = {},
+    showNoPostsToast: () -> Unit,
 ) {
   var showMenu by rememberSaveable { mutableStateOf(false) }
   val uiState = viewModel.homeUiState.collectAsStateWithLifecycle()
@@ -171,8 +171,7 @@ private fun HomeFeedCell(
       Text(
         text = stringResource(
           id = R.string.by,
-          post.author?.firstname ?: "",
-          post.author?.lastname ?: ""
+          post.author?.username ?: "",
         ),
         style = MaterialTheme.typography.titleSmall
       )
@@ -196,7 +195,7 @@ private fun HomeFeedCell(
           contentScale = ContentScale.Crop,
         )
       }
-      if (post.description.isNullOrEmpty() == false) {
+      if (post.description.isEmpty() == false) {
         Text(
           text = post.description,
           style = MaterialTheme.typography.bodyMedium
@@ -220,8 +219,8 @@ private fun HomeFeedCellPreview() {
         timestamp = 1,
         author = User(
           id = "1",
-          firstname = "firstname",
-          lastname = "lastname"
+          username = "username",
+          pictureUrl = "",
         )
       ),
       onPostClick = {}
@@ -243,8 +242,8 @@ private fun HomeFeedCellImagePreview() {
         timestamp = 1,
         author = User(
           id = "1",
-          firstname = "firstname",
-          lastname = "lastname"
+          username = "username",
+          pictureUrl = "",
         )
       ),
       onPostClick = {}

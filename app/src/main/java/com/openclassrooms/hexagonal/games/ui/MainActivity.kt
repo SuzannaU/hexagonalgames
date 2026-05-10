@@ -59,11 +59,12 @@ class MainActivity : ComponentActivity() {
                     val authState = viewModel.authState.collectAsStateWithLifecycle()
 
                     HexagonalGamesNavHost(
+                        modifier = Modifier.padding(innerPadding),
                         isUserAuthenticated = authState.value.isAuthenticated,
                         navHostController = navController,
                         onSignInClicked = { startSignInActivity() },
                         onSelectPhotoClicked = ::launchPhotoPicker,
-                        modifier = Modifier.padding(innerPadding),
+                        afterSignOut = { viewModel.userIsNotAuthenticated() },
                         showNoPostsToast = { showNoPostsToast() },
                         showNotAuthentifiedToast = { showNotAuthentifiedToast() },
                         showUnknownErrorToast = { showUnknownErrorToast() }
@@ -77,10 +78,8 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         val currentUser = viewModel.getCurrentUser()
         if (currentUser != null) {
-            Log.d("TAG", "user is authenticated")
             viewModel.userIsAuthenticated()
         } else {
-            Log.d("TAG", "user is NOT authenticated")
             viewModel.userIsNotAuthenticated()
         }
     }
@@ -105,15 +104,10 @@ class MainActivity : ComponentActivity() {
         val response = result.idpResponse
         if (result.resultCode == RESULT_OK) {
             viewModel.userIsAuthenticated()
-            Log.d("TAG", "connexion successful")
+            viewModel.createUser()
         } else if (response?.error != null) {
             viewModel.userIsNotAuthenticated()
-            Log.d("TAG", "connexion failed")
         }
-    }
-
-    private fun signOut() {
-        viewModel.signOut()
     }
 
     private fun launchPhotoPicker(pickMediaLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
@@ -135,19 +129,20 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HexagonalGamesNavHost(
+    modifier: Modifier = Modifier,
     isUserAuthenticated: Boolean,
     navHostController: NavHostController,
     onSignInClicked: () -> Unit,
     onSelectPhotoClicked: ((ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>)) -> Unit,
+    afterSignOut: () -> Unit,
     showNoPostsToast: () -> Unit,
     showNotAuthentifiedToast: () -> Unit,
     showUnknownErrorToast: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navHostController,
         startDestination = Screen.HomeFeed.route,
-        modifier = modifier
+        modifier = modifier,
     ) {
         composable(route = Screen.HomeFeed.route) {
             HomeFeedScreen(
@@ -193,7 +188,10 @@ fun HexagonalGamesNavHost(
                 onBackClick = { navHostController.navigateUp() },
                 accountDeleted = { navHostController.navigate(Screen.HomeFeed.route) },
                 deletionError = showUnknownErrorToast,
-                afterSignOut = { navHostController.navigate(Screen.HomeFeed.route) }
+                afterSignOut = {
+                    navHostController.navigate(Screen.HomeFeed.route)
+                    afterSignOut()
+                }
             )
         }
     }

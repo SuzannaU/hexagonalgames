@@ -3,7 +3,7 @@
   <string name="action_settings">Settings</string>
   <string name="add_fragment_label">Add a post</string>
   <string name="homefeed_fragment_label">Home</string>
-  <string name="by">By %1$s %2$s</string>
+  <string name="by">By %1$s</string>
   <string name="notification_enable">Enable notifications</string>
   <string name="notification_disable">Disable notifications</string>
   <string name="description_button_add">Add</string>

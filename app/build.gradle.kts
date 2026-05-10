@@ -71,7 +71,11 @@ dependencies {
     //firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
     implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.ui.firestore)
+    implementation(libs.firebase.ui.storage)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

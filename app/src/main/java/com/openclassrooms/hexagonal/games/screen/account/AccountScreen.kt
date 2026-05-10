@@ -14,10 +14,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.openclassrooms.hexagonal.games.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,6 +33,34 @@ fun AccountScreen(
     deletionError: () -> Unit,
     afterSignOut: () -> Unit,
 ) {
+
+    val deleteState by viewModel.deleteAccountState.collectAsStateWithLifecycle()
+    LaunchedEffect(deleteState) {
+        when (deleteState) {
+            DeleteAccountState.Success -> {
+                accountDeleted()
+            }
+            DeleteAccountState.Failed -> {
+                deletionError()
+            }
+
+            else -> {}
+        }
+    }
+
+    val signOutState by viewModel.signOutState.collectAsStateWithLifecycle()
+    LaunchedEffect(signOutState) {
+        when (signOutState) {
+            SignOutState.Success -> {
+                afterSignOut()
+            }
+            SignOutState.Failed -> {
+                deletionError()
+            }
+
+            else -> {}
+        }
+    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -52,17 +83,8 @@ fun AccountScreen(
     ) { contentPadding ->
         Account(
             modifier = Modifier.padding(contentPadding),
-            onSignOutClicked = {
-                viewModel.signOut()
-                afterSignOut()
-            },
-            onDeleteAccountClicked = {
-                if (viewModel.deleteAccount()) {
-                    accountDeleted()
-                } else {
-                    deletionError()
-                }
-            },
+            onSignOutClicked = { viewModel.signOut() },
+            onDeleteAccountClicked = { viewModel.deleteAccount() },
         )
     }
 }
