@@ -30,7 +30,7 @@ fun AccountScreen(
     viewModel: AccountViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     accountDeleted: () -> Unit,
-    deletionError: () -> Unit,
+    unknownError: () -> Unit,
     afterSignOut: () -> Unit,
 ) {
 
@@ -41,7 +41,7 @@ fun AccountScreen(
                 accountDeleted()
             }
             DeleteAccountState.Failed -> {
-                deletionError()
+                unknownError()
             }
 
             else -> {}
@@ -55,7 +55,7 @@ fun AccountScreen(
                 afterSignOut()
             }
             SignOutState.Failed -> {
-                deletionError()
+                unknownError()
             }
 
             else -> {}

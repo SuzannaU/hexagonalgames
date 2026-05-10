@@ -2,7 +2,6 @@ package com.openclassrooms.hexagonal.games.ui
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -187,7 +186,7 @@ fun HexagonalGamesNavHost(
             AccountScreen(
                 onBackClick = { navHostController.navigateUp() },
                 accountDeleted = { navHostController.navigate(Screen.HomeFeed.route) },
-                deletionError = showUnknownErrorToast,
+                unknownError = showUnknownErrorToast,
                 afterSignOut = {
                     navHostController.navigate(Screen.HomeFeed.route)
                     afterSignOut()
