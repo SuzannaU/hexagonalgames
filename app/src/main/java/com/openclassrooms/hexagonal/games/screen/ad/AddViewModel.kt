@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.screen.ad
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +26,8 @@ class AddViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
+
+    private var photoUri: Uri? = null
 
     /**
      * Internal mutable state flow representing the current post being edited.
@@ -78,9 +81,10 @@ class AddViewModel @Inject constructor(
             }
 
             is FormEvent.PhotoChanged -> {
-                _post.value = _post.value.copy(
-                    photoUrl = formEvent.photoUri.toString()
-                )
+                photoUri = formEvent.photoUri
+//                _post.value = _post.value.copy(
+//                    photoUrl = photoUri.toString()
+//                )
             }
         }
     }
@@ -101,7 +105,8 @@ class AddViewModel @Inject constructor(
                                 pictureUrl = it.photoUrl.toString(),
                                 username = it.displayName ?: "",
                             )
-                        )
+                        ),
+                        photoUri = photoUri,
                     )
                 } catch (e: Exception) {
                     Log.e("TAG", "Error while adding post: ${e.message}")

@@ -1,13 +1,19 @@
 package com.openclassrooms.hexagonal.games.data.service
 
+import android.net.Uri
+import android.util.Log
+import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.dataObjects
+import com.google.firebase.storage.FirebaseStorage
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import kotlinx.coroutines.flow.Flow
+import java.util.UUID
 
 class PostApiImpl(
     private val firestore: FirebaseFirestore,
+    private val firebaseStorage: FirebaseStorage,
 ) : PostApi {
 
 
@@ -19,8 +25,34 @@ class PostApiImpl(
         return posts
     }
 
-    override fun addPost(post: Post) {
-        firestore.collection("posts").document(post.id)
-            .set(post)
+    override fun addPost(post: Post, photoUri: Uri?) {
+
+        if (photoUri != null) {
+            uploadPhoto(photoUri).addOnSuccessListener { uri ->
+                val postToSave = post.copy(
+                    photoUrl = uri.toString()
+                )
+                firestore.collection("posts").document(post.id)
+                    .set(postToSave)
+            }
+        }
+    }
+
+    private fun uploadPhoto(photoUri: Uri): Task<Uri> {
+
+        val uuid = UUID.randomUUID().toString()
+        val storageRef = firebaseStorage.reference
+        val photoRef = storageRef.child("photos").child(uuid)
+
+        val uploadTask = photoRef.putFile(photoUri)
+        val urlTask = uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            photoRef.downloadUrl
+        }
+        return urlTask
     }
 }

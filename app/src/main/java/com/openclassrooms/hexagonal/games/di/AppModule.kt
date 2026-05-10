@@ -2,6 +2,7 @@ package com.openclassrooms.hexagonal.games.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.data.repository.UserRepository
 import com.openclassrooms.hexagonal.games.data.service.PostApi
@@ -28,19 +29,11 @@ class AppModule {
      *
      * @return A Singleton instance of PostFakeApi.
      */
-    @Provides
-    @Singleton
-    fun providePostApi(): PostApi {
-        return PostFakeApi()
-    }
-
-    @Provides
-    @Singleton
-    fun providePostApiImpl(): PostApi {
-        return PostApiImpl(
-            provideFirebaseFirestore(),
-        )
-    }
+//    @Provides
+//    @Singleton
+//    fun providePostApi(): PostApi {
+//        return PostFakeApi()
+//    }
 
     @Provides
     @Singleton
@@ -52,6 +45,21 @@ class AppModule {
     @Singleton
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun providePostApiImpl(): PostApi {
+        return PostApiImpl(
+            provideFirebaseFirestore(),
+            provideFirebaseStorage()
+        )
     }
 
     @Provides

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * This class implements the PostApi interface and provides a fake in-memory data source for Posts.
  * It's intended for testing purposes and simulates a real API.
  */
-class PostFakeApi : PostApi {
+class PostFakeApi {
     private val users = mutableListOf(
         User(
             id = "1",
@@ -73,11 +73,11 @@ class PostFakeApi : PostApi {
         )
     )
 
-    override fun getPostsOrderByCreationDateDesc(): Flow<List<Post>> =
-        posts
-
-    override fun addPost(post: Post) {
-        posts.value.add(0, post)
-    }
+//    override fun getPostsOrderByCreationDateDesc(): Flow<List<Post>> =
+//        posts
+//
+//    override fun addPost(post: Post) {
+//        posts.value.add(0, post)
+//    }
 
 }

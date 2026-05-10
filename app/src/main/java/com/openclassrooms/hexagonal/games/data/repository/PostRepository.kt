@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.data.repository
 
+import android.net.Uri
 import com.openclassrooms.hexagonal.games.data.service.PostApi
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import kotlinx.coroutines.flow.Flow
@@ -29,8 +30,7 @@ class PostRepository @Inject constructor(
      *
      * @param post The Post object to be added.
      */
-    fun addPost(post: Post?) {
-        postApi.addPost(post!!)
+    fun addPost(post: Post, photoUri: Uri?) {
+        postApi.addPost(post, photoUri)
     }
-
 }
