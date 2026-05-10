@@ -17,45 +17,35 @@ import javax.inject.Inject
  * allowing UI components to observe and react to changes in the posts data.
  */
 @HiltViewModel
-class HomeFeedViewModel @Inject constructor(private val postRepository: PostRepository) :
-  ViewModel() {
-  
-  private val _posts: MutableStateFlow<List<Post>> = MutableStateFlow(emptyList())
+class HomeFeedViewModel @Inject constructor(
+    private val postRepository: PostRepository
+) : ViewModel() {
 
-  private val _homeUiState = MutableStateFlow<HomeScreenState>(HomeScreenState.NoPosts)
-  val homeUiState = _homeUiState.asStateFlow()
+    private val _homeUiState = MutableStateFlow<HomeScreenState>(HomeScreenState.NoPosts)
+    val homeUiState = _homeUiState.asStateFlow()
 
-  init {
-    viewModelScope.launch {
-      postRepository.posts.collect { posts ->
-        if (posts.isEmpty()) {
-          _homeUiState.value = HomeScreenState.NoPosts
-        } else {
-          _homeUiState.value = HomeScreenState.PostsLoaded(posts)
+    init {
+        viewModelScope.launch {
+            postRepository.posts.collect { posts ->
+                if (posts.isEmpty()) {
+                    _homeUiState.value = HomeScreenState.NoPosts
+                } else {
+                    _homeUiState.value = HomeScreenState.PostsLoaded(posts)
+                }
+            }
         }
-      }
     }
-  }
-  
-  /**
-   * Returns a Flow observable containing the list of posts fetched from the repository.
-   *
-   * @return A Flow<List<Post>> object that can be observed for changes.
-   */
-  val posts: StateFlow<List<Post>>
-    get() = _posts
-
 }
 
 sealed class HomeScreenState() {
 
-  object NoPosts : HomeScreenState()
+    object NoPosts : HomeScreenState()
 
-  data class ErrorState(
-    val errorMessage: String?,
-  ): HomeScreenState()
+    data class ErrorState(
+        val errorMessage: String?,
+    ) : HomeScreenState()
 
-  data class PostsLoaded(
-    val posts: List<Post>,
-  ) : HomeScreenState()
+    data class PostsLoaded(
+        val posts: List<Post>,
+    ) : HomeScreenState()
 }
