@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.screen.settings
 
+import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -35,8 +35,9 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
+    onNotificationEnabledClicked: () -> Unit,
+    onNotificationDisabledClicked: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -60,9 +61,9 @@ fun SettingsScreen(
     ) { contentPadding ->
         Settings(
             modifier = Modifier.padding(contentPadding),
-            onNotificationDisabledClicked = { viewModel.disableNotifications() },
+            onNotificationDisabledClicked = { onNotificationDisabledClicked() },
             onNotificationEnabledClicked = {
-                viewModel.enableNotifications()
+                onNotificationEnabledClicked()
             },
         )
     }
@@ -77,7 +78,7 @@ private fun Settings(
 ) {
     val notificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(
-            android.Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS
         )
     } else {
         null
@@ -98,12 +99,12 @@ private fun Settings(
         Button(
             onClick = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
                     if (notificationsPermissionState?.status?.isGranted == false) {
                         notificationsPermissionState.launchPermissionRequest()
                     }
+                    onNotificationEnabledClicked()
                 }
-
-                onNotificationEnabledClicked()
             }
         ) {
             Text(text = stringResource(id = R.string.notification_enable))

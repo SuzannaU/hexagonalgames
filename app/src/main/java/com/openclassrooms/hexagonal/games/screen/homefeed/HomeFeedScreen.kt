@@ -58,195 +58,199 @@ fun HomeFeedScreen(
     onFABClick: () -> Unit = {},
     showNoPostsToast: () -> Unit,
 ) {
-  var showMenu by rememberSaveable { mutableStateOf(false) }
-  val uiState = viewModel.homeUiState.collectAsStateWithLifecycle()
-  
-  Scaffold(
-    modifier = modifier,
-    topBar = {
-      TopAppBar(
-        title = {
-          Text(stringResource(id = R.string.homefeed_fragment_label))
+    var showMenu by rememberSaveable { mutableStateOf(false) }
+    val uiState = viewModel.homeUiState.collectAsStateWithLifecycle()
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(stringResource(id = R.string.homefeed_fragment_label))
+                },
+                actions = {
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(id = R.string.contentDescription_more)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                onSettingsClick()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.action_settings)
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            onClick = {
+                                onAccountClick()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.my_account)
+                                )
+                            }
+                        )
+                    }
+                }
+            )
         },
-        actions = {
-          IconButton(onClick = { showMenu = !showMenu }) {
-            Icon(
-              imageVector = Icons.Default.MoreVert,
-              contentDescription = stringResource(id = R.string.contentDescription_more)
-            )
-          }
-          DropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false }
-          ) {
-            DropdownMenuItem(
-              onClick = {
-                onSettingsClick()
-              },
-              text = {
-                Text(
-                  text = stringResource(id = R.string.action_settings)
+        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    onFABClick()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.description_button_add)
                 )
-              }
-            )
-            DropdownMenuItem(
-              onClick = {
-                onAccountClick()
-              },
-              text = {
-                Text(
-                  text = stringResource(id = R.string.my_account)
+            }
+        }
+    ) { contentPadding ->
+        when (uiState.value) {
+
+            is HomeScreenState.ErrorState -> {}
+
+            HomeScreenState.Loading -> {
+
+            }
+
+            HomeScreenState.NoPosts -> {
+                showNoPostsToast()
+            }
+
+            is HomeScreenState.PostsLoaded -> {
+                HomeFeedList(
+                    modifier = modifier.padding(contentPadding),
+                    posts = (uiState.value as HomeScreenState.PostsLoaded).posts,
+                    onPostClick = onPostClick
                 )
-              }
-            )
-          }
-        }
-      )
-    },
-    floatingActionButtonPosition = FabPosition.End,
-    floatingActionButton = {
-      FloatingActionButton(
-        onClick = {
-          onFABClick()
-        }
-      ) {
-        Icon(
-          imageVector = Icons.Filled.Add,
-          contentDescription = stringResource(id = R.string.description_button_add)
-        )
-      }
-    }
-  ) { contentPadding ->
-    when (uiState.value) {
-
-        is HomeScreenState.ErrorState -> TODO()
-
-        HomeScreenState.NoPosts -> {
-          showNoPostsToast()
-        }
-
-        is HomeScreenState.PostsLoaded -> {
-          HomeFeedList(
-            modifier = modifier.padding(contentPadding),
-            posts = (uiState.value as HomeScreenState.PostsLoaded).posts,
-            onPostClick = onPostClick
-          )
+            }
         }
     }
-  }
 }
 
 @Composable
 private fun HomeFeedList(
-  modifier: Modifier = Modifier,
-  posts: List<Post>,
-  onPostClick: (Post) -> Unit,
+    modifier: Modifier = Modifier,
+    posts: List<Post>,
+    onPostClick: (Post) -> Unit,
 ) {
-  LazyColumn(
-    modifier = modifier.padding(8.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    items(posts) { post ->
-      HomeFeedCell(
-        post = post,
-        onPostClick = onPostClick
-      )
+    LazyColumn(
+        modifier = modifier.padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(posts) { post ->
+            HomeFeedCell(
+                post = post,
+                onPostClick = onPostClick
+            )
+        }
     }
-  }
 }
 
 @Composable
 private fun HomeFeedCell(
-  post: Post,
-  onPostClick: (Post) -> Unit,
+    post: Post,
+    onPostClick: (Post) -> Unit,
 ) {
-  ElevatedCard(
-    modifier = Modifier.fillMaxWidth(),
-    onClick = {
-      onPostClick(post)
-    }) {
-    Column(
-      modifier = Modifier.padding(8.dp),
-    ) {
-      Text(
-        text = stringResource(
-          id = R.string.by,
-          post.author?.username ?: "",
-        ),
-        style = MaterialTheme.typography.titleSmall
-      )
-      Text(
-        text = post.title,
-        style = MaterialTheme.typography.titleLarge
-      )
-      if (post.photoUrl.isEmpty() == false) {
-        AsyncImage(
-          modifier = Modifier
-            .padding(top = 8.dp)
-            .fillMaxWidth()
-            .heightIn(max = 200.dp)
-            .aspectRatio(ratio = 16 / 9f),
-          model = post.photoUrl,
-          imageLoader = LocalContext.current.imageLoader.newBuilder()
-            .logger(DebugLogger())
-            .build(),
-          placeholder = ColorPainter(Color.DarkGray),
-          contentDescription = "image",
-          contentScale = ContentScale.Crop,
-        )
-      }
-      if (post.description.isEmpty() == false) {
-        Text(
-          text = post.description,
-          style = MaterialTheme.typography.bodyMedium
-        )
-      }
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            onPostClick(post)
+        }) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Text(
+                text = stringResource(
+                    id = R.string.by,
+                    post.author?.username ?: "",
+                ),
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = post.title,
+                style = MaterialTheme.typography.titleLarge
+            )
+            if (post.photoUrl.isEmpty() == false) {
+                AsyncImage(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth()
+                        .heightIn(max = 200.dp)
+                        .aspectRatio(ratio = 16 / 9f),
+                    model = post.photoUrl,
+                    imageLoader = LocalContext.current.imageLoader.newBuilder()
+                        .logger(DebugLogger())
+                        .build(),
+                    placeholder = ColorPainter(Color.DarkGray),
+                    contentDescription = "image",
+                    contentScale = ContentScale.Crop,
+                )
+            }
+            if (post.description.isEmpty() == false) {
+                Text(
+                    text = post.description,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
-  }
 }
 
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
 private fun HomeFeedCellPreview() {
-  HexagonalGamesTheme {
-    HomeFeedCell(
-      post = Post(
-        id = "1",
-        title = "title",
-        description = "description",
-        photoUrl = "",
-        timestamp = 1,
-        author = User(
-          id = "1",
-          username = "username",
-          pictureUrl = "",
+    HexagonalGamesTheme {
+        HomeFeedCell(
+            post = Post(
+                id = "1",
+                title = "title",
+                description = "description",
+                photoUrl = "",
+                timestamp = 1,
+                author = User(
+                    id = "1",
+                    username = "username",
+                    pictureUrl = "",
+                )
+            ),
+            onPostClick = {}
         )
-      ),
-      onPostClick = {}
-    )
-  }
+    }
 }
 
 @PreviewLightDark
 @PreviewScreenSizes
 @Composable
 private fun HomeFeedCellImagePreview() {
-  HexagonalGamesTheme {
-    HomeFeedCell(
-      post = Post(
-        id = "1",
-        title = "title",
-        description = "",
-        photoUrl = "https://picsum.photos/id/85/1080/",
-        timestamp = 1,
-        author = User(
-          id = "1",
-          username = "username",
-          pictureUrl = "",
+    HexagonalGamesTheme {
+        HomeFeedCell(
+            post = Post(
+                id = "1",
+                title = "title",
+                description = "",
+                photoUrl = "https://picsum.photos/id/85/1080/",
+                timestamp = 1,
+                author = User(
+                    id = "1",
+                    username = "username",
+                    pictureUrl = "",
+                )
+            ),
+            onPostClick = {}
         )
-      ),
-      onPostClick = {}
-    )
-  }
+    }
 }

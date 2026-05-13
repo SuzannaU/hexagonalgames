@@ -24,4 +24,5 @@
   <string name="select_photo">Sélectionner une photo</string>
   <string name="sign_out">Déconnexion</string>
   <string name="delete_account">Suppression du compte</string>
+  <string name="notifications_enabled">Les notifications sont autorisées</string>
 </resources>

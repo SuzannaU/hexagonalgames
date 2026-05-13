@@ -1,7 +1,10 @@
 package com.openclassrooms.hexagonal.games.ui
 
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -64,9 +67,11 @@ class MainActivity : ComponentActivity() {
                         onSignInClicked = { startSignInActivity() },
                         onSelectPhotoClicked = ::launchPhotoPicker,
                         afterSignOut = { viewModel.userIsNotAuthenticated() },
+                        onNotificationDisabledClicked = { launchAppSettings() },
                         showNoPostsToast = { showNoPostsToast() },
                         showNotAuthentifiedToast = { showNotAuthentifiedToast() },
-                        showUnknownErrorToast = { showUnknownErrorToast() }
+                        showUnknownErrorToast = { showUnknownErrorToast() },
+                        showNotificationsEnabledToast = { showNotificationsEnabledToast() },
                     )
                 }
             }
@@ -113,6 +118,16 @@ class MainActivity : ComponentActivity() {
         pickMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
+    private fun launchAppSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val intent = Intent().apply {
+                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            }
+            startActivity(intent)
+        }
+    }
+
     private fun showNoPostsToast() {
         Toast.makeText(this, getString(R.string.no_posts), Toast.LENGTH_SHORT).show()
     }
@@ -124,6 +139,10 @@ class MainActivity : ComponentActivity() {
     private fun showUnknownErrorToast() {
         Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
     }
+
+    private fun showNotificationsEnabledToast() {
+        Toast.makeText(this, getString(R.string.notifications_enabled), Toast.LENGTH_SHORT).show()
+    }
 }
 
 @Composable
@@ -134,9 +153,11 @@ fun HexagonalGamesNavHost(
     onSignInClicked: () -> Unit,
     onSelectPhotoClicked: ((ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>)) -> Unit,
     afterSignOut: () -> Unit,
+    onNotificationDisabledClicked: () -> Unit,
     showNoPostsToast: () -> Unit,
     showNotAuthentifiedToast: () -> Unit,
     showUnknownErrorToast: () -> Unit,
+    showNotificationsEnabledToast: () -> Unit,
 ) {
     NavHost(
         navController = navHostController,
@@ -180,6 +201,8 @@ fun HexagonalGamesNavHost(
         composable(route = Screen.Settings.route) {
             SettingsScreen(
                 onBackClick = { navHostController.navigateUp() },
+                onNotificationEnabledClicked = showNotificationsEnabledToast,
+                onNotificationDisabledClicked = onNotificationDisabledClicked
             )
         }
         composable(route = Screen.Account.route) {

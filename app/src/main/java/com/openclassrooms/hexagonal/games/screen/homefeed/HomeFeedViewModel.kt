@@ -21,7 +21,7 @@ class HomeFeedViewModel @Inject constructor(
     private val postRepository: PostRepository
 ) : ViewModel() {
 
-    private val _homeUiState = MutableStateFlow<HomeScreenState>(HomeScreenState.NoPosts)
+    private val _homeUiState = MutableStateFlow<HomeScreenState>(HomeScreenState.Loading)
     val homeUiState = _homeUiState.asStateFlow()
 
     init {
@@ -39,6 +39,7 @@ class HomeFeedViewModel @Inject constructor(
 
 sealed class HomeScreenState() {
 
+    object Loading : HomeScreenState()
     object NoPosts : HomeScreenState()
 
     data class ErrorState(
