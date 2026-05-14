@@ -1,4 +1,4 @@
-package com.openclassrooms.hexagonal.games.screen.ad
+package com.openclassrooms.hexagonal.games.screen.addPost
 
 import android.net.Uri
 import android.util.Log
@@ -82,10 +82,9 @@ class AddViewModel @Inject constructor(
 
             is FormEvent.PhotoChanged -> {
                 photoUri = formEvent.photoUri
-//                _post.value = _post.value.copy(
-//                    photoUrl = photoUri.toString()
-//                )
             }
+
+            else -> {}
         }
     }
 

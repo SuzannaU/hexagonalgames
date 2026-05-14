@@ -1,7 +1,9 @@
 package com.openclassrooms.hexagonal.games.data.repository
 
 import android.net.Uri
+import android.util.Log
 import com.openclassrooms.hexagonal.games.data.service.PostApi
+import com.openclassrooms.hexagonal.games.domain.model.Comment
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -16,6 +18,14 @@ import javax.inject.Inject
 class PostRepository @Inject constructor(
     private val postApi: PostApi
 ) {
+
+    suspend fun getPostById(postId: String): Post? {
+        return postApi.getPostById(postId = postId)
+    }
+
+    fun getCommentsByPostById(postId: String): Flow<List<Comment>> {
+        return postApi.getCommentByPostId(postId = postId)
+    }
 
     /**
      * Retrieves a Flow object containing a list of Posts ordered by creation date
@@ -32,5 +42,9 @@ class PostRepository @Inject constructor(
      */
     fun addPost(post: Post, photoUri: Uri?) {
         postApi.addPost(post, photoUri)
+    }
+
+    fun addComment(comment: Comment, postId: String) {
+        postApi.addComment(comment, postId)
     }
 }

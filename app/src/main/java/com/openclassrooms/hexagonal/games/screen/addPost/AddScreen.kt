@@ -1,4 +1,4 @@
-package com.openclassrooms.hexagonal.games.screen.ad
+package com.openclassrooms.hexagonal.games.screen.addPost
 
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher

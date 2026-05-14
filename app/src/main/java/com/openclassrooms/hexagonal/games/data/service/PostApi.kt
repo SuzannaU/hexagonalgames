@@ -1,6 +1,7 @@
 package com.openclassrooms.hexagonal.games.data.service
 
 import android.net.Uri
+import com.openclassrooms.hexagonal.games.domain.model.Comment
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import kotlinx.coroutines.flow.Flow
 
@@ -10,6 +11,10 @@ import kotlinx.coroutines.flow.Flow
  * implementation details of fetching and persisting data.
  */
 interface PostApi {
+
+  suspend fun getPostById(postId: String): Post?
+
+  fun getCommentByPostId(postId: String): Flow<List<Comment>>
   /**
    * Retrieves a list of Posts ordered by their creation date in descending order.
    *
@@ -23,4 +28,6 @@ interface PostApi {
    * @param post The Post object to be added.
    */
   fun addPost(post: Post, photoUri: Uri?)
+
+  fun addComment(comment: Comment, postId: String)
 }

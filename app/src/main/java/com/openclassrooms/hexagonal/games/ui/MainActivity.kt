@@ -20,16 +20,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
-import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
+import com.openclassrooms.hexagonal.games.screen.addComment.AddCommentScreen
+import com.openclassrooms.hexagonal.games.screen.addPost.AddScreen
+import com.openclassrooms.hexagonal.games.screen.detail.DetailScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomeFeedScreen
 import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
@@ -166,8 +170,8 @@ fun HexagonalGamesNavHost(
     ) {
         composable(route = Screen.HomeFeed.route) {
             HomeFeedScreen(
-                onPostClick = {
-                    //TODO
+                onPostClick = { postId ->
+                    navHostController.navigate("post/$postId")
                 },
                 onSettingsClick = {
                     navHostController.navigate(Screen.Settings.route)
@@ -214,6 +218,43 @@ fun HexagonalGamesNavHost(
                     navHostController.navigate(Screen.HomeFeed.route)
                     afterSignOut()
                 }
+            )
+        }
+        composable(
+            route = "post/{postId}",
+            arguments = listOf(
+                navArgument("postId") {
+                    type = NavType.StringType
+                }
+            ),
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId") ?: ""
+            DetailScreen(
+                postId = postId,
+                onBackClick = { navHostController.navigateUp() },
+                onFABClick = {
+                    if (isUserAuthenticated) {
+                        navHostController.navigate("post/$postId/addComment")
+                    } else {
+                        onSignInClicked()
+                    }
+                },
+            )
+        }
+        composable(
+            route = "post/{postId}/addComment",
+            arguments = listOf(
+                navArgument("postId") {
+                    type = NavType.StringType
+                }
+            ),
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId") ?: ""
+            AddCommentScreen(
+                postId = postId,
+                onBackClick = { navHostController.navigateUp() },
+                onSaveSuccessful = { navHostController.navigateUp() },
+                onSaveFailed = showUnknownErrorToast,
             )
         }
     }

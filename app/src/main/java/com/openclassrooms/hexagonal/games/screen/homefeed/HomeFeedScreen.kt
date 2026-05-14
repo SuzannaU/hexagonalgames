@@ -54,7 +54,7 @@ fun HomeFeedScreen(
     viewModel: HomeFeedViewModel = hiltViewModel(),
     onSettingsClick: () -> Unit = {},
     onAccountClick: () -> Unit = {},
-    onPostClick: (Post) -> Unit = {},
+    onPostClick: (String) -> Unit = {},
     onFABClick: () -> Unit = {},
     showNoPostsToast: () -> Unit,
 ) {
@@ -119,12 +119,6 @@ fun HomeFeedScreen(
     ) { contentPadding ->
         when (uiState.value) {
 
-            is HomeScreenState.ErrorState -> {}
-
-            HomeScreenState.Loading -> {
-
-            }
-
             HomeScreenState.NoPosts -> {
                 showNoPostsToast()
             }
@@ -136,6 +130,8 @@ fun HomeFeedScreen(
                     onPostClick = onPostClick
                 )
             }
+
+            else -> {}
         }
     }
 }
@@ -144,7 +140,7 @@ fun HomeFeedScreen(
 private fun HomeFeedList(
     modifier: Modifier = Modifier,
     posts: List<Post>,
-    onPostClick: (Post) -> Unit,
+    onPostClick: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.padding(8.dp),
@@ -153,7 +149,7 @@ private fun HomeFeedList(
         items(posts) { post ->
             HomeFeedCell(
                 post = post,
-                onPostClick = onPostClick
+                onPostClick = { onPostClick(post.id) }
             )
         }
     }

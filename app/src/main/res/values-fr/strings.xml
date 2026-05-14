@@ -3,12 +3,14 @@
   <string name="action_settings">Paramètres</string>
   <string name="homefeed_fragment_label">Home</string>
   <string name="add_fragment_label">Ajout d\'une publication</string>
+  <string name="add_comment">Ajouter un commentaire</string>
   <string name="by">Par %1$s</string>
   <string name="notification_enable">Activer les notifications</string>
   <string name="notification_disable">Désactiver les notifications</string>
   <string name="description_button_add">Ajout</string>
   <string name="hint_title">Titre</string>
   <string name="hint_description">Description</string>
+  <string name="hint_comment">Commentaire</string>
   <string name="action_save">Sauvegarder</string>
   <string name="contentDescription_go_back">Retour</string>
   <string name="contentDescription_more">Plus</string>
@@ -16,6 +18,7 @@
   <string name="error_title">Titre non valide</string>
   <string name="error_description">Description non valide</string>
   <string name="error_photo">Photo non valide</string>
+  <string name="error_comment">Commentaire non valide</string>
   <string name="sign_in_with_email">Se connecter avec une adresse e-mail</string>
   <string name="my_account">Mon compte</string>
   <string name="no_posts">Aucune publication</string>

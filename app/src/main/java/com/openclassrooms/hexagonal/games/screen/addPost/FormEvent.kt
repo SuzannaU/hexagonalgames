@@ -1,4 +1,4 @@
-package com.openclassrooms.hexagonal.games.screen.ad
+package com.openclassrooms.hexagonal.games.screen.addPost
 
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -29,6 +29,8 @@ sealed class FormEvent {
    * @property photoUri is the URI of the selected image.
    */
   data class PhotoChanged(val photoUri: Uri) : FormEvent()
+
+  data class CommentChanged(val commentContent: String) : FormEvent()
   
 }
 
@@ -59,5 +61,7 @@ sealed class FormError(@StringRes val messageRes: Int) {
    * The actual error message can be retrieved using the provided resource ID (`R.string.error_photo`).
    */
   data object PhotoError : FormError(R.string.error_photo)
+
+  data object CommentError : FormError(R.string.error_comment)
   
 }

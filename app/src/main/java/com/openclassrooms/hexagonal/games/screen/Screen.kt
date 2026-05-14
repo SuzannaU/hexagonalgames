@@ -1,6 +1,7 @@
 package com.openclassrooms.hexagonal.games.screen
 
 import androidx.navigation.NamedNavArgument
+import com.openclassrooms.hexagonal.games.domain.model.Post
 
 sealed class Screen(
   val route: String,
@@ -13,4 +14,7 @@ sealed class Screen(
   data object Settings : Screen("settings")
 
   data object Account : Screen("account")
+
+  data class Details(val postId: String) : Screen("details/$postId")
+  // TODO look how to use this thing in navigation
 }

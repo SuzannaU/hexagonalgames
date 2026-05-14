@@ -2,6 +2,7 @@
   <string name="app_name">Hexagonal Games</string>
   <string name="action_settings">Settings</string>
   <string name="add_fragment_label">Add a post</string>
+  <string name="add_comment">Add a comment</string>
   <string name="homefeed_fragment_label">Home</string>
   <string name="by">By %1$s</string>
   <string name="notification_enable">Enable notifications</string>
@@ -9,6 +10,7 @@
   <string name="description_button_add">Add</string>
   <string name="hint_title">Title</string>
   <string name="hint_description">Description</string>
+  <string name="hint_comment">Comment</string>
   <string name="action_save">Save</string>
   <string name="contentDescription_go_back">Go back</string>
   <string name="contentDescription_more">More</string>
@@ -16,6 +18,7 @@
   <string name="error_title">Title not valid</string>
   <string name="error_description">Invalid description</string>
   <string name="error_photo">Invalid photo</string>
+  <string name="error_comment">Invalid comment</string>
   <string name="sign_in_with_email">Sign in with email</string>
   <string name="my_account">My account</string>
   <string name="no_posts">No posts</string>
