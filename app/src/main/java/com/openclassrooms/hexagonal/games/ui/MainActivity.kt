@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -17,14 +18,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
@@ -60,35 +60,37 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             HexagonalGamesTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+                val authNetworkState = viewModel.authNetworkState.collectAsStateWithLifecycle()
+
+                LaunchedEffect(authNetworkState) {
+                    if (!authNetworkState.value.isAuthConnected) {
+                        showNetworkErrorToast()
+                    }
+                }
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                ) { innerPadding ->
 
                     val authState = viewModel.authState.collectAsStateWithLifecycle()
 
-                    HexagonalGamesNavHost(
-                        modifier = Modifier.padding(innerPadding),
-                        isUserAuthenticated = authState.value.isAuthenticated,
-                        navHostController = navController,
-                        onSignInClicked = { startSignInActivity() },
-                        onSelectPhotoClicked = ::launchPhotoPicker,
-                        afterSignOut = { viewModel.userIsNotAuthenticated() },
-                        onNotificationDisabledClicked = { launchAppSettings() },
-                        showNoPostsToast = { showNoPostsToast() },
-                        showNotAuthentifiedToast = { showNotAuthentifiedToast() },
-                        showUnknownErrorToast = { showUnknownErrorToast() },
-                        showNotificationsEnabledToast = { showNotificationsEnabledToast() },
-                    )
+                        HexagonalGamesNavHost(
+                            modifier = Modifier.padding(innerPadding),
+                            isUserAuthenticated = authState.value.isAuthenticated,
+                            isNetworkWorking = authNetworkState.value.isAuthConnected,
+                            navHostController = navController,
+                            onSignInClicked = { startSignInActivity() },
+                            onSelectPhotoClicked = ::launchPhotoPicker,
+                            onNotificationDisabledClicked = { launchAppSettings() },
+                            showNoPostsToast = { showNoPostsToast() },
+                            showNotAuthentifiedToast = { showNotAuthentifiedToast() },
+                            showNetworkErrorToast = { showNetworkErrorToast() },
+                            showUnknownErrorToast = { showUnknownErrorToast() },
+                            showNotificationsEnabledToast = { showNotificationsEnabledToast() },
+                        )
                 }
             }
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        val currentUser = viewModel.getCurrentUser()
-        if (currentUser != null) {
-            viewModel.userIsAuthenticated()
-        } else {
-            viewModel.userIsNotAuthenticated()
         }
     }
 
@@ -111,10 +113,9 @@ class MainActivity : ComponentActivity() {
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
         val response = result.idpResponse
         if (result.resultCode == RESULT_OK) {
-            viewModel.userIsAuthenticated()
             viewModel.createUser()
         } else if (response?.error != null) {
-            viewModel.userIsNotAuthenticated()
+            Log.w("TAG", "Error while signing in: ${response.error?.message}")
         }
     }
 
@@ -140,6 +141,10 @@ class MainActivity : ComponentActivity() {
         Toast.makeText(this, getString(R.string.need_authentication), Toast.LENGTH_SHORT).show()
     }
 
+    private fun showNetworkErrorToast() {
+        Toast.makeText(this, getString(R.string.no_network), Toast.LENGTH_SHORT).show()
+    }
+
     private fun showUnknownErrorToast() {
         Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
     }
@@ -153,13 +158,14 @@ class MainActivity : ComponentActivity() {
 fun HexagonalGamesNavHost(
     modifier: Modifier = Modifier,
     isUserAuthenticated: Boolean,
+    isNetworkWorking: Boolean,
     navHostController: NavHostController,
     onSignInClicked: () -> Unit,
     onSelectPhotoClicked: ((ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>)) -> Unit,
-    afterSignOut: () -> Unit,
     onNotificationDisabledClicked: () -> Unit,
     showNoPostsToast: () -> Unit,
     showNotAuthentifiedToast: () -> Unit,
+    showNetworkErrorToast: () -> Unit,
     showUnknownErrorToast: () -> Unit,
     showNotificationsEnabledToast: () -> Unit,
 ) {
@@ -177,12 +183,13 @@ fun HexagonalGamesNavHost(
                     navHostController.navigate(Screen.Settings.route)
                 },
                 onFABClick = {
-                    if (isUserAuthenticated) {
+                    if (isNetworkWorking && isUserAuthenticated) {
                         navHostController.navigate(Screen.AddPost.route)
+                    } else if (!isNetworkWorking) {
+                        showNetworkErrorToast()
                     } else {
                         showNotAuthentifiedToast()
                     }
-
                 },
                 onAccountClick = {
                     if (isUserAuthenticated) {
@@ -198,8 +205,9 @@ fun HexagonalGamesNavHost(
             AddScreen(
                 onBackClick = { navHostController.navigateUp() },
                 onSaveSuccessful = { navHostController.navigateUp() },
-                onSaveFailed = showUnknownErrorToast,
                 onSelectPhotoClick = onSelectPhotoClicked,
+                onNetworkError = showNetworkErrorToast,
+                onUnknownError = showUnknownErrorToast,
             )
         }
         composable(route = Screen.Settings.route) {
@@ -216,7 +224,6 @@ fun HexagonalGamesNavHost(
                 unknownError = showUnknownErrorToast,
                 afterSignOut = {
                     navHostController.navigate(Screen.HomeFeed.route)
-                    afterSignOut()
                 }
             )
         }
@@ -229,8 +236,10 @@ fun HexagonalGamesNavHost(
                 postId = postId,
                 onBackClick = { navHostController.navigateUp() },
                 onFABClick = {
-                    if (isUserAuthenticated) {
+                    if (isNetworkWorking && isUserAuthenticated) {
                         navHostController.navigate(Screen.AddComment.createRoute(postId))
+                    } else if (!isNetworkWorking) {
+                        showNetworkErrorToast()
                     } else {
                         showNotAuthentifiedToast()
                     }
@@ -246,7 +255,8 @@ fun HexagonalGamesNavHost(
                 postId = postId,
                 onBackClick = { navHostController.navigateUp() },
                 onSaveSuccessful = { navHostController.navigateUp() },
-                onSaveFailed = showUnknownErrorToast,
+                onNetworkError = showNetworkErrorToast,
+                onUnknownError = showUnknownErrorToast,
             )
         }
     }

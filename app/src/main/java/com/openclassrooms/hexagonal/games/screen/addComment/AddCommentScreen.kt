@@ -1,17 +1,10 @@
 package com.openclassrooms.hexagonal.games.screen.addComment
 
-import android.net.Uri
-import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -27,15 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.domain.model.Comment
+import com.openclassrooms.hexagonal.games.screen.addPost.AddViewModel
 import com.openclassrooms.hexagonal.games.screen.addPost.FormError
 import com.openclassrooms.hexagonal.games.screen.addPost.FormEvent
 
@@ -47,7 +39,8 @@ fun AddCommentScreen(
     viewModel: AddCommentViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onSaveSuccessful: () -> Unit,
-    onSaveFailed: () -> Unit,
+    onNetworkError: () -> Unit,
+    onUnknownError: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -71,18 +64,29 @@ fun AddCommentScreen(
     ) { contentPadding ->
         val comment by viewModel.comment.collectAsStateWithLifecycle()
         val error by viewModel.error.collectAsStateWithLifecycle()
+        val saveState = viewModel.saveState.collectAsStateWithLifecycle()
+
+        when (saveState.value) {
+            AddViewModel.SaveState.PostSaved -> {
+                onSaveSuccessful()
+            }
+
+            AddViewModel.SaveState.NetworkError -> {
+                onNetworkError()
+            }
+
+            AddViewModel.SaveState.UnknownError -> {
+                onUnknownError()
+            }
+
+            else -> {}
+        }
 
         AddComment(
             modifier = Modifier.padding(contentPadding),
             comment = comment,
             onCommentChanged = { viewModel.onAction(FormEvent.CommentChanged(it))},
-            onSaveCommentClicked = {
-                if (viewModel.addCommentSuccessful(postId)) {
-                    onSaveSuccessful()
-                } else {
-                    onSaveFailed()
-                }
-            },
+            onSaveCommentClicked = { viewModel.addComment(postId) },
             error = error,
         )
     }

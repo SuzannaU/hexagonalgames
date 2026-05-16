@@ -24,6 +24,7 @@
   <string name="no_posts">Aucune publication</string>
   <string name="need_authentication">Un compte est nécessaire pour ajouter une publication</string>
   <string name="unknown_error">Une erreur est survenue</string>
+  <string name="no_network">Pas de réseau</string>
   <string name="select_photo">Sélectionner une photo</string>
   <string name="sign_out">Déconnexion</string>
   <string name="delete_account">Suppression du compte</string>

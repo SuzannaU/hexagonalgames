@@ -1,11 +1,14 @@
 package com.openclassrooms.hexagonal.games.screen.addComment
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.FirebaseNetworkException
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.data.repository.UserRepository
 import com.openclassrooms.hexagonal.games.domain.model.Comment
 import com.openclassrooms.hexagonal.games.domain.model.User
+import com.openclassrooms.hexagonal.games.screen.addPost.AddViewModel
 import com.openclassrooms.hexagonal.games.screen.addPost.FormError
 import com.openclassrooms.hexagonal.games.screen.addPost.FormEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +26,8 @@ class AddCommentViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val firebaseUser = userRepository.getCurrentUser()
+    private val _saveState = MutableStateFlow<SaveState>(AddCommentViewModel.SaveState.Idle)
+    val saveState = _saveState.asStateFlow()
 
     private var _comment = firebaseUser?.let {
         MutableStateFlow(
@@ -61,7 +66,7 @@ class AddCommentViewModel @Inject constructor(
         }
     }
 
-    fun addCommentSuccessful(postId: String): Boolean {
+    fun addComment(postId: String) {
         val user = userRepository.getCurrentUser()
         user?.let {
             try {
@@ -69,11 +74,15 @@ class AddCommentViewModel @Inject constructor(
                     comment = _comment.value,
                     postId = postId,
                 )
+                _saveState.value = SaveState.CommentSaved
+            } catch (e: FirebaseNetworkException) {
+                _saveState.value = SaveState.NetworkError
+                Log.e("TAG", "Network Error while adding comment: ${e.message}")
             } catch (e: Exception) {
-                return false
+                _saveState.value = SaveState.UnknownError
+                Log.e("TAG", "Error while adding comment: ${e.message}")
             }
         }
-        return true
     }
 
     private fun verifyComment(): FormError? {
@@ -81,5 +90,12 @@ class AddCommentViewModel @Inject constructor(
             return FormError.CommentError
         }
         return null
+    }
+    sealed class SaveState {
+
+        object Idle: SaveState()
+        object CommentSaved: SaveState()
+        object NetworkError: SaveState()
+        object UnknownError: SaveState()
     }
 }

@@ -1,8 +1,8 @@
 package com.openclassrooms.hexagonal.games.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FirebaseAuth
 import com.openclassrooms.hexagonal.games.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,29 +12,41 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val userRepository: UserRepository
-) :
-    ViewModel() {
+    private val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth,
+) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
     val authState = _authState.asStateFlow()
 
-    fun getCurrentUser(): FirebaseUser? {
-        return userRepository.getCurrentUser()
+    private lateinit var listener: FirebaseAuth.AuthStateListener
+
+    private val _authNetworkState = MutableStateFlow(NetworkState())
+    val authNetworkState = _authNetworkState.asStateFlow()
+
+    init {
+        observeAuthState()
     }
 
-    fun userIsAuthenticated() {
-        Log.i("TAG", "user is authenticated")
-        _authState.update {
-            _authState.value.copy(isAuthenticated = true)
+    private fun observeAuthState() {
+        try {
+            listener = FirebaseAuth.AuthStateListener {
+                _authState.value = AuthState(isAuthenticated = it.currentUser != null)
+            }
+            firebaseAuth.addAuthStateListener(listener)
+            _authNetworkState.update {
+                _authNetworkState.value.copy(isAuthConnected = true)
+            }
+        } catch (e: FirebaseNetworkException) {
+            _authNetworkState.update {
+                _authNetworkState.value.copy(isAuthConnected = false)
+            }
         }
     }
 
-    fun userIsNotAuthenticated() {
-        Log.i("TAG", "user is NOT authenticated")
-        _authState.update {
-            _authState.value.copy(isAuthenticated = false)
-        }
+    override fun onCleared() {
+        super.onCleared()
+        firebaseAuth.removeAuthStateListener(listener)
     }
 
     fun createUser() {
@@ -44,4 +56,8 @@ class MainActivityViewModel @Inject constructor(
 
 data class AuthState(
     val isAuthenticated: Boolean = false,
+)
+
+data class NetworkState(
+    val isAuthConnected: Boolean = false,
 )

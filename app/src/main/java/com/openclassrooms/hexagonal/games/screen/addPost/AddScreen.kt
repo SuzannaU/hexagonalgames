@@ -49,7 +49,8 @@ fun AddScreen(
     viewModel: AddViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onSaveSuccessful: () -> Unit,
-    onSaveFailed: () -> Unit,
+    onNetworkError: () -> Unit,
+    onUnknownError: () -> Unit,
     onSelectPhotoClick: (ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) -> Unit,
 ) {
 
@@ -75,6 +76,23 @@ fun AddScreen(
     ) { contentPadding ->
         val post by viewModel.post.collectAsStateWithLifecycle()
         val error by viewModel.error.collectAsStateWithLifecycle()
+        val saveState = viewModel.saveState.collectAsStateWithLifecycle()
+
+        when (saveState.value) {
+            AddViewModel.SaveState.PostSaved -> {
+                onSaveSuccessful()
+            }
+
+            AddViewModel.SaveState.NetworkError -> {
+                onNetworkError()
+            }
+
+            AddViewModel.SaveState.UnknownError -> {
+                onUnknownError()
+            }
+
+            else -> {}
+        }
 
         CreatePost(
             modifier = Modifier.padding(contentPadding),
@@ -83,14 +101,7 @@ fun AddScreen(
             onTitleChanged = { viewModel.onAction(FormEvent.TitleChanged(it)) },
             description = post.description,
             onDescriptionChanged = { viewModel.onAction(FormEvent.DescriptionChanged(it)) },
-            onSaveClicked = {
-                if (viewModel.addPostSuccessful()) {
-                    onSaveSuccessful()
-                } else {
-                    onSaveFailed()
-                }
-
-            },
+            onSaveClicked = { viewModel.addPost() },
             onSelectPhotoClick = onSelectPhotoClick,
             onPhotoPicked = { uri ->
                 if (uri != null) {

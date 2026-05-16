@@ -1,6 +1,5 @@
 package com.openclassrooms.hexagonal.games.screen.detail
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
@@ -26,7 +25,7 @@ class DetailViewModel @Inject constructor(
             if (post == null) {
                 _detailUiState.value = DetailScreenState.NoPost
             } else {
-                postRepository.getCommentsByPostById(post.id).collect{ comments ->
+                postRepository.getCommentsByPostById(post.id).collect { comments ->
                     _detailUiState.value = DetailScreenState.PostLoaded(post, comments)
                 }
             }
@@ -38,10 +37,6 @@ sealed class DetailScreenState {
 
     object Loading : DetailScreenState()
     object NoPost : DetailScreenState()
-
-    data class ErrorState(
-        val errorMessage: String?,
-    ) : DetailScreenState()
 
     data class PostLoaded(
         val post: Post,

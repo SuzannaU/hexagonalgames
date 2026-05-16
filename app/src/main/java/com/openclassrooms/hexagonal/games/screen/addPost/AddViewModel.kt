@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.FirebaseNetworkException
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.data.repository.UserRepository
 import com.openclassrooms.hexagonal.games.domain.model.Post
@@ -12,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.UUID
@@ -26,6 +28,9 @@ class AddViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
+
+    private val _saveState = MutableStateFlow<SaveState>(SaveState.Idle)
+    val saveState = _saveState.asStateFlow()
 
     private var photoUri: Uri? = null
 
@@ -92,7 +97,7 @@ class AddViewModel @Inject constructor(
      * Attempts to add the current post to the repository after setting the author.
      *
      */
-    fun addPostSuccessful(): Boolean {
+    fun addPost() {
 
         val user = userRepository.getCurrentUser()
         user?.let {
@@ -107,12 +112,15 @@ class AddViewModel @Inject constructor(
                         ),
                         photoUri = photoUri,
                     )
+                    _saveState.value = SaveState.PostSaved
+                } catch (e: FirebaseNetworkException) {
+                    _saveState.value = SaveState.NetworkError
+                    Log.e("TAG", "Network Error while adding post: ${e.message}")
                 } catch (e: Exception) {
+                    _saveState.value = SaveState.UnknownError
                     Log.e("TAG", "Error while adding post: ${e.message}")
-                    return false
                 }
         }
-        return true
     }
 
     /**
@@ -136,5 +144,12 @@ class AddViewModel @Inject constructor(
         }
 
         return null
+    }
+    sealed class SaveState {
+
+        object Idle: SaveState()
+        object PostSaved: SaveState()
+        object NetworkError: SaveState()
+        object UnknownError: SaveState()
     }
 }
