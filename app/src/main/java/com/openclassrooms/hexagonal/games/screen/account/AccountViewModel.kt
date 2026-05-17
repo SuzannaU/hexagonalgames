@@ -25,7 +25,7 @@ class AccountViewModel @Inject constructor(
             Log.i("TAG", "user signed out")
         } catch (e: Exception) {
             _signOutState.value = SignOutState.Failed
-            Log.w("TAG", "Sign out failed: ${e.message}")
+            Log.e("TAG", "Sign out failed: ${e.message}")
         }
     }
 

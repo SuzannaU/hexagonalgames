@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.screen.addComment
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,15 +68,15 @@ fun AddCommentScreen(
         val saveState = viewModel.saveState.collectAsStateWithLifecycle()
 
         when (saveState.value) {
-            AddViewModel.SaveState.PostSaved -> {
+            AddCommentViewModel.SaveState.CommentSaved -> {
                 onSaveSuccessful()
             }
 
-            AddViewModel.SaveState.NetworkError -> {
+            AddCommentViewModel.SaveState.NetworkError -> {
                 onNetworkError()
             }
 
-            AddViewModel.SaveState.UnknownError -> {
+            AddCommentViewModel.SaveState.UnknownError -> {
                 onUnknownError()
             }
 
@@ -106,7 +107,8 @@ private fun AddComment(
         modifier = modifier
             .padding(16.dp)
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
             OutlinedTextField(
                 modifier = Modifier

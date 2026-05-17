@@ -33,7 +33,7 @@ class PostApiImpl(
             .collection("posts")
             .document(postId)
             .collection("comments")
-            .orderBy("dateCreated", Query.Direction.DESCENDING)
+            .orderBy("dateCreated", Query.Direction.ASCENDING)
             .dataObjects<Comment>()
     }
 

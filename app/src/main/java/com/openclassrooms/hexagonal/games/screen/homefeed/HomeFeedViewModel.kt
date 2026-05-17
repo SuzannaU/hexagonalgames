@@ -26,7 +26,7 @@ class HomeFeedViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            postRepository.posts.collect { posts ->
+            postRepository.getPosts().collect { posts ->
                 if (posts.isEmpty()) {
                     _homeUiState.value = HomeScreenState.NoPosts
                 } else {

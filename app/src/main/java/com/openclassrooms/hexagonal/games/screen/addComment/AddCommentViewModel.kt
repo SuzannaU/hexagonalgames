@@ -25,19 +25,15 @@ class AddCommentViewModel @Inject constructor(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    private val firebaseUser = userRepository.getCurrentUser()
-    private val _saveState = MutableStateFlow<SaveState>(AddCommentViewModel.SaveState.Idle)
+    private val user = userRepository.getCurrentUser()
+    private val _saveState = MutableStateFlow<SaveState>(SaveState.Idle)
     val saveState = _saveState.asStateFlow()
 
-    private var _comment = firebaseUser?.let {
+    private var _comment = user?.let {
         MutableStateFlow(
             Comment(
                 content = "",
-                author = User(
-                    id = it.uid,
-                    pictureUrl = it.photoUrl.toString(),
-                    username = it.displayName ?: "",
-                ),
+                author = user,
             )
         )
     } ?: MutableStateFlow(
@@ -75,6 +71,7 @@ class AddCommentViewModel @Inject constructor(
                     postId = postId,
                 )
                 _saveState.value = SaveState.CommentSaved
+                Log.i("TAG", "Comment added successfully")
             } catch (e: FirebaseNetworkException) {
                 _saveState.value = SaveState.NetworkError
                 Log.e("TAG", "Network Error while adding comment: ${e.message}")

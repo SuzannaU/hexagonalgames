@@ -36,11 +36,21 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests {
+            all {
+                it.useJUnitPlatform()
+            }
+        }
+    }
 }
 
 dependencies {
     //kotlin
     implementation(platform(libs.kotlin.bom))
+    implementation(libs.kotlinx.coroutines.android)
+    testImplementation(libs.coroutines.test)
 
     //DI
     implementation(libs.hilt)
@@ -63,7 +73,6 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
 
-    implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.coil.compose)
     implementation(libs.accompanist.permissions)
@@ -79,7 +88,12 @@ dependencies {
     implementation(libs.firebase.ui.firestore)
     implementation(libs.firebase.ui.storage)
 
+    // Testing
+    testRuntimeOnly(libs.junit.platform)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    testImplementation(libs.mockk)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(platform(libs.compose.bom))
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
