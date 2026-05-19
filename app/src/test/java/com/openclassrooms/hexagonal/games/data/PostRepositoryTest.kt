@@ -29,7 +29,7 @@ import org.junit.jupiter.api.assertNotNull
 class PostRepositoryTest {
 
     private val postApi: PostApi = mockk()
-    val uri: Uri = mockk()
+    private val uri: Uri = mockk()
     private val postRepository = PostRepository(postApi)
     private lateinit var post: Post
     private lateinit var comment: Comment

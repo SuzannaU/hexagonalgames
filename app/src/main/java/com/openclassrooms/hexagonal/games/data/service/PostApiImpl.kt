@@ -1,7 +1,6 @@
 package com.openclassrooms.hexagonal.games.data.service
 
 import android.net.Uri
-import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -46,7 +45,6 @@ class PostApiImpl(
     }
 
     override fun addPost(post: Post, photoUri: Uri?) {
-
         if (photoUri != null) {
             uploadPhoto(photoUri).addOnSuccessListener { uri ->
                 val postToSave = post.copy(
@@ -55,6 +53,9 @@ class PostApiImpl(
                 firestore.collection("posts").document(post.id)
                     .set(postToSave)
             }
+        } else {
+            firestore.collection("posts").document(post.id)
+                .set(post)
         }
     }
 

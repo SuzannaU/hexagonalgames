@@ -8,7 +8,6 @@ import com.google.firebase.FirebaseNetworkException
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.data.repository.UserRepository
 import com.openclassrooms.hexagonal.games.domain.model.Post
-import com.openclassrooms.hexagonal.games.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,7 +31,8 @@ class AddViewModel @Inject constructor(
     private val _saveState = MutableStateFlow<SaveState>(SaveState.Idle)
     val saveState = _saveState.asStateFlow()
 
-    private var photoUri: Uri? = null
+    private val _uriState = MutableStateFlow<Uri?>(null)
+    val uriState = _uriState.asStateFlow()
 
     /**
      * Internal mutable state flow representing the current post being edited.
@@ -86,7 +86,7 @@ class AddViewModel @Inject constructor(
             }
 
             is FormEvent.PhotoChanged -> {
-                photoUri = formEvent.photoUri
+                _uriState.value = formEvent.photoUri
             }
 
             else -> {}
@@ -106,7 +106,7 @@ class AddViewModel @Inject constructor(
                         _post.value.copy(
                             author = user
                         ),
-                        photoUri = photoUri,
+                        photoUri = _uriState.value,
                     )
                     _saveState.value = SaveState.PostSaved
                 } catch (e: FirebaseNetworkException) {
